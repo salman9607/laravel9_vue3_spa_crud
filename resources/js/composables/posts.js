@@ -1,10 +1,12 @@
 //kind of like service class, include related to posts
 import {ref} from 'vue' //ref is shortform for reference
+import { useRouter } from 'vue-router'
 
 export  default  function usePosts() {
     // const posts = ref([]);// it means posts will be reactive, whenever we will call getPosts, the posts variable will get refreshed auto
     const posts = ref({});// in case of pagination
 
+    const router = useRouter();
     // const  getPosts = async () => {
     //     axios.get('api/posts')
     //         .then(response => {
@@ -36,5 +38,12 @@ export  default  function usePosts() {
             })
     }
 
-    return {posts, getPosts}//what we will return
+    const storePost = async (post) => {
+        axios.post('/api/posts', post)
+            .then((response) => {
+                router.push({name: 'posts.index'})
+            })
+    };
+
+    return {posts, getPosts, storePost}//what we will return
 }
