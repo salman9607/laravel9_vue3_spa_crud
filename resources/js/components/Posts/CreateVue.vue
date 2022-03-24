@@ -44,6 +44,17 @@
                 </div>
             </div>
         </div>
+        <div class="mt-4">
+            <label for="thumbnail" class="block font-medium text-sm text-gray-700">
+                Thumbnail
+            </label>
+            <input type="file" id="thumbnail" @change="post.thumbnail = $event.target.files[0]">
+            <div class="text-red-600 mt-1">
+                <div v-for="message in validationErrors?.thumbnail">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
 
         <!-- Buttons -->
         <div class="mt-4">
@@ -67,6 +78,7 @@
                 title: '',
                 content: '',
                 category_id: '',
+                thumbnail: '',
             })
 
             const {categories, getCategories } = useCategories();
