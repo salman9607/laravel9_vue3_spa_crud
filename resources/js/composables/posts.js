@@ -7,6 +7,8 @@ export  default  function usePosts() {
     const posts = ref({});// in case of pagination
 
     const router = useRouter();
+    const validationErrors = ref({});
+    const isLoading = ref(false);
     // const  getPosts = async () => {
     //     axios.get('api/posts')
     //         .then(response => {
@@ -39,11 +41,22 @@ export  default  function usePosts() {
     }
 
     const storePost = async (post) => {
+        if(isLoading.value) return;
+
+        isLoading.value = true;
+        validationErrors.value = {};
+
         axios.post('/api/posts', post)
             .then((response) => {
                 router.push({name: 'posts.index'})
             })
+            .catch(error => {
+                if(error.response?.data) {// ? => optional chaning operator => if error response is empty/null then script would not crash and will return false
+                    validationErrors.value = error.response.data.errors;
+                }
+            })
+            .finally( () => isLoading.value = false );
     };
 
-    return {posts, getPosts, storePost}//what we will return
+    return {posts, getPosts, storePost, validationErrors, isLoading}//what we will return
 }
