@@ -1,11 +1,12 @@
 //kind of like service class, include related to posts
-import {ref} from 'vue' //ref is shortform for reference
+import {ref, inject} from 'vue' //ref is shortform for reference, inject is using for sweetalert
 import { useRouter } from 'vue-router'
 
 export  default  function usePosts() {
     // const posts = ref([]);// it means posts will be reactive, whenever we will call getPosts, the posts variable will get refreshed auto
     const posts = ref({});// in case of pagination
     const post = ref({});
+    const swal = inject('$swal');
 
     const router = useRouter();
     const validationErrors = ref({});
@@ -62,6 +63,7 @@ export  default  function usePosts() {
         axios.post('/api/posts', serializedPost)//for file upload
             .then((response) => {
                 router.push({name: 'posts.index'})
+                swal('Post Saved Successfully!');
             })
             .catch(error => {
                 if(error.response?.data) {// ? => optional chaning operator => if error response is empty/null then script would not crash and will return false
@@ -70,6 +72,7 @@ export  default  function usePosts() {
             })
             .finally( () => isLoading.value = false );
     };
+
     const updatePost = async (post) => {
         if(isLoading.value) return;
         isLoading.value = true;
@@ -79,6 +82,10 @@ export  default  function usePosts() {
         axios.put('/api/posts/' +post.id, post)//for file upload
             .then((response) => {
                 router.push({name: 'posts.index'})
+                swal({
+                    icon: 'success',
+                    title: 'Post Update Successfully!'
+                });
             })
             .catch(error => {
                 if(error.response?.data) {// ? => optional chaning operator => if error response is empty/null then script would not crash and will return false
@@ -88,5 +95,38 @@ export  default  function usePosts() {
             .finally( () => isLoading.value = false );
     };
 
-    return {posts, post, getPosts, getPost, storePost, updatePost, validationErrors, isLoading}//what we will return
+    const deletePost = async (id) => {
+        swal({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this action!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            confirmButtonColor: '#ef4444',
+            timer: 20000,
+            timerProgressBar: true,
+            reverseButtons: true
+        })
+            .then(result => {
+                if (result.isConfirmed) {
+                    axios.delete('/api/posts/' + id)
+                        .then(response => {
+                            getPosts()
+                            router.push({name: 'posts.index'})
+                            swal({
+                                icon: 'success',
+                                title: 'Post deleted successfully'
+                            })
+                        })
+                        .catch(error => {
+                            swal({
+                                icon: 'error',
+                                title: 'Something went wrong'
+                            })
+                        })
+                }
+            })
+    };
+
+    return {posts, post, getPosts, getPost, storePost, updatePost, deletePost, validationErrors, isLoading}//what we will return
 }
