@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 export  default  function usePosts() {
     // const posts = ref([]);// it means posts will be reactive, whenever we will call getPosts, the posts variable will get refreshed auto
     const posts = ref({});// in case of pagination
+    const post = ref({});
 
     const router = useRouter();
     const validationErrors = ref({});
@@ -40,12 +41,17 @@ export  default  function usePosts() {
             })
     }
 
+    const  getPost = async (id) => {
+        axios.get('/api/posts/'+id)
+            .then(response => {
+                post.value = response.data.data;
+            })
+    }
+
     const storePost = async (post) => {
         if(isLoading.value) return;
-
         isLoading.value = true;
         validationErrors.value = {};
-
         let serializedPost = new FormData();
         for (let item in post) {
             if(post.hasOwnProperty(item)){
@@ -64,6 +70,23 @@ export  default  function usePosts() {
             })
             .finally( () => isLoading.value = false );
     };
+    const updatePost = async (post) => {
+        if(isLoading.value) return;
+        isLoading.value = true;
+        validationErrors.value = {};
 
-    return {posts, getPosts, storePost, validationErrors, isLoading}//what we will return
+        // axios.post('/api/posts', post)
+        axios.put('/api/posts/' +post.id, post)//for file upload
+            .then((response) => {
+                router.push({name: 'posts.index'})
+            })
+            .catch(error => {
+                if(error.response?.data) {// ? => optional chaning operator => if error response is empty/null then script would not crash and will return false
+                    validationErrors.value = error.response.data.errors;
+                }
+            })
+            .finally( () => isLoading.value = false );
+    };
+
+    return {posts, post, getPosts, getPost, storePost, updatePost, validationErrors, isLoading}//what we will return
 }

@@ -9,3 +9,5 @@ VueJs3 => composition API => divide two way => 1. composable, 2. main component
 
 npm install laravel-vue-pagination
 npm install vue-router
+
+npm install -S vue-sweetalert2
