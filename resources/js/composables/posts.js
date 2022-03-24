@@ -29,12 +29,21 @@ export  default  function usePosts() {
     //sorting
     const  getPosts = async (
         page = 1,
-        category = '',
+        search_category = '',
+        search_id = '',
+        search_title = '',
+        search_content = '',
+        search_global = '',
         order_column = 'created_at',
         order_direction = 'desc',
     ) => {
+        console.log(search_title);
         axios.get('api/posts?page='+page+
-            '&category=' + category +
+            '&search_category=' + search_category +
+            '&search_id=' + search_id +
+            '&search_title=' + search_title +
+            '&search_global=' + search_global +
+            '&search_content=' + search_content +
             '&order_column=' + order_column +
             '&order_direction=' + order_direction)
             .then(response => {

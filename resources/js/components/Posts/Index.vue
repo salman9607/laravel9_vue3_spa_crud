@@ -2,16 +2,34 @@
     <div class="overflow-hidden overflow-x-auto p-6 bg-white border-gray-200">
         <div class="min-w-full align-middle">
             <div class="mb-4">
-                <select v-model="selectedCategory" class="block mt-1 w-full sm:w-1/4 rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    <option value="" selected>-- Filter by category --</option>
-                    <option v-for="category in categories" :value="category.id">
-                        {{ category.name }}
-                    </option>
-                </select>
+                div class="mb-4 grid lg:grid-cols-4 gap-4">
+                <input v-model="search_global" type="text" placeholder="Search..." class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+
             </div>
         </div>
     <table class="min-w-full divide-y divide-gray-200 border">
         <thead>
+        <tr>
+            <th class="px-6 py-3 bg-gray-50 text-left">
+                <input v-model="search_id" type="text" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Filter by ID">
+            </th>
+            <th class="px-6 py-3 bg-gray-50 text-left">
+                <input v-model="search_title" type="text" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Filter by Title">
+            </th>
+            <th class="px-6 py-3 bg-gray-50 text-left">
+                <select v-model="search_category" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="" selected>-- all categories --</option>
+                    <option v-for="category in categories" :value="category.id">
+                        {{ category.name }}
+                    </option>
+                </select>
+            </th>
+            <th class="px-6 py-3 bg-gray-50 text-left">
+                <input v-model="search_content" type="text" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Filter by Content">
+            </th>
+            <th class="px-6 py-3 bg-gray-50 text-left"></th>
+            <th class="px-6 py-3 bg-gray-50 text-left"></th>
+        </tr>
         <tr>
             <th class="px-6 py-3 bg-gray-50 text-left">
 <!--                <span class="text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">ID</span>-->
@@ -81,7 +99,7 @@
         </tbody>
     </table>
 <!--    <Pagination :data="posts" @pagination-change-page="getPosts"></Pagination>-->
-    <Pagination :data="posts" @pagination-change-page="page => getPosts(page, selectedCategory)"></Pagination>
+    <Pagination :data="posts" @pagination-change-page="page => getPosts(page, search_category)"></Pagination>
     </div>
 </template>
 
@@ -111,7 +129,11 @@
     //sorting
     export default {
         setup() {
-            const selectedCategory = ref('');
+            const search_category = ref('');
+            const search_id = ref('');
+            const search_title = ref('');
+            const search_content = ref('');
+            const search_global = ref('');
             const orderColumn = ref('created_at');
             const orderDirection = ref('desc');
             const {posts, getPosts, deletePost} = usePosts();
@@ -124,11 +146,61 @@
             const updateOrdering = (column) => {
                 orderColumn.value = column;
                 orderDirection.value = (orderDirection.value === 'asc') ? 'desc' : 'asc';
-                getPosts(1, selectedCategory.value, orderColumn.value, orderDirection.value)
+                getPosts(1,
+                    search_category.value,
+                    search_id.value,
+                    search_title.value,
+                    search_content.value,
+                    search_global.value,
+                    orderColumn.value,
+                    orderDirection.value
+                )
             };
 
-            watch(selectedCategory, (current, previous) => {
-               getPosts(1, current);
+            watch(search_category, (current, previous) => {
+               getPosts(1,
+                   current,
+                   search_id.value,
+                   search_title.value,
+                   search_content.value,
+                   search_global.value,
+               );
+            });
+            watch(search_id, (current, previous) => {
+               getPosts(1,
+                   search_category.value,
+                   current,
+                   search_title.value,
+                   search_content.value,
+                   search_global.value,
+               );
+            });
+            watch(search_title, (current, previous) => {
+               getPosts(1,
+                   search_category.value,
+                   search_id.value,
+                   current,
+                   search_content.value,
+                   search_global.value,
+               );
+            });
+            watch(search_content, (current, previous) => {
+               getPosts(1,
+                   search_category.value,
+                   search_id.value,
+                   search_title.value,
+                   current,
+                   search_global.value,
+               );
+            });
+            watch(search_global, (current, previous) => {
+               getPosts(1,
+                   search_category.value,
+                   search_id.value,
+                   search_title.value,
+                   search_content.value,
+                   current,
+               );
             });
             // return {posts}
             return {
@@ -136,7 +208,11 @@
                 getPosts,
                 deletePost,
                 categories,
-                selectedCategory,
+                search_category,
+                search_id,
+                search_title,
+                search_content,
+                search_global,
                 orderColumn,
                 orderDirection,
                 updateOrdering}//whatever we will pass here, will return to the dom
