@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 //    return view('welcome');
 //});
 
+Route::post('login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
+
+
 Route::view('/{any?}','dashboard')
     ->name('dashboard')
     ->where('any', '.*');
