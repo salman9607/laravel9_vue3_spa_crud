@@ -1,6 +1,6 @@
 composer require laravel/breeze
 php artisan breeze:install
-pm install vue@next && npm install vue-loader@next //will install latest version
+npm install vue@next && npm install vue-loader@next //will install latest version
 php artisan make:model Post -mfs
 php artisan make:controller Api/PostController
 
@@ -11,3 +11,11 @@ npm install laravel-vue-pagination
 npm install vue-router
 
 npm install -S vue-sweetalert2
+
+php artisan make:model Permission -ms
+php artisan make:model Role -ms
+php artisan make:migration create_permission_role_table
+php artisan make:migration create_role_user_table
+
+
+npm install @casl/vue @casl/ability

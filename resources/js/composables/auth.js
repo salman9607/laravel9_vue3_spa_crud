@@ -1,11 +1,17 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, inject } from 'vue';
 import { useRouter } from "vue-router";
+
+const user = reactive({
+  name: '',
+  email: ''
+});
 
 export default function userAuth() {
 
     const router = useRouter();
     const validationErrors = ref({});
     const processing = ref(false);
+    const swal = inject('$swal');
 
     const loginForm = reactive({
         email: '',
@@ -18,7 +24,7 @@ export default function userAuth() {
         processing.value = true;
         validationErrors.value = {};
         axios.post('/login', loginForm)
-            .then(response => {
+            .then(async response => {
                 loginUser(response)
             })
             .catch(error => {
@@ -30,10 +36,41 @@ export default function userAuth() {
     }
 
 
-    const loginUser = (response) => {
+    const loginUser = async (response) => {
+        user.name = response.data.name;
+        user.email = response.data.email;
+
         localStorage.setItem('loggedIn', JSON.stringify(true))
         router.push({ name: 'posts.index' })
     }
 
-    return { loginForm, validationErrors, processing, submitLogin };
+    const getUser = () => {
+        axios.get('/api/user')
+            .then(response => {
+                loginUser(response);
+            }).catch(error => {
+                console.log(error);
+        })
+    }
+
+    const logout = async () => {
+        if(processing.value) return;
+
+        processing.value = true;
+
+        axios.post('logout')
+            .then(response => router.push({ name: 'login' }))
+            .catch(error => {
+                swal({
+                    icon: 'error',
+                    title: error.response.status,
+                    text: error.response.statusText
+                })
+            })
+            .finally(() => {
+                processing.value = false;
+            })
+    }
+
+    return { loginForm, validationErrors, processing, submitLogin, user, getUser, logout };
 }

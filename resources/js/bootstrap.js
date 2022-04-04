@@ -15,8 +15,10 @@ window.axios.interceptors.response.use(
     response => response,
     error => {
         if (error.response?.status === 401 || error.response?.status === 419) {
-            localStorage.setItem('loggedIn', false);
-            location.assign('/login');
+            if (JSON.parse(localStorage.getItem('loggedIn'))) {
+                localStorage.setItem('loggedIn', false)
+                location.assign('/login')
+            }
         }
     }
 );
